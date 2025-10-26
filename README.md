@@ -13,8 +13,10 @@
 
 | Contract | Address | Explorer Link | Purpose |
 |----------|---------|---------------|---------|
-| **MerchantRegistry** | `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY) | Verifies and manages merchants |
 | **ImpactVault** | `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW) | Manages donor USDC deposits and yield distribution |
+| **ProgramManager** | `CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN) | Creates and manages aid programs |
+| **VoucherManager** | `CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG) | Tracks vouchers and merchant redemptions |
+| **MerchantRegistry** | `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY) | Verifies and manages merchants |
 | **ImpactCreditNFT** | `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2) | Proof-of-impact NFTs for ESG investors |
 
 ## 🎯 Problem & Solution
@@ -35,6 +37,29 @@ AidLoop creates an **antifragile aid economy** that thrives in volatility. By le
 https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
 
 *Watch AidLoop in action: See how donors deposit USDC, yield generates automatically, and humanitarian services get funded transparently.*
+
+## 📸 Screenshots
+
+### Donor Dashboard
+![Donor Dashboard](public/donardd.png)
+*Donor interface showing impact tracking and yield generation*
+
+### Donor Impact View
+![Donor Impact](public/donorss.png)
+*Real-time impact metrics and transparency features*
+
+### Merchant Portal
+![Merchant Portal](public/merchant.png)
+*Merchant interface for service provider registration and redemption*
+
+### Dashboard Overview
+![Dashboard Bottom](public/dashboardbottom.png)
+*Complete system overview and analytics*
+
+### DeFi Integration
+![Blend Protocol](public/blend.png)
+![Aquarius Protocol](public/aquarious.png)
+*Integration with DeFi protocols for yield generation*
 
 ## 🏗️ How It Works
 
@@ -67,7 +92,18 @@ AidLoop leverages Stellar's unique capabilities to create a transparent, efficie
 - **Soroban RPC** — Contract interaction and simulation
 - **Stellar SDK** — JavaScript integration for frontend
 
+### Smart Contract Architecture
 
+#### Core Contracts
+- **`ImpactVault`** — `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW`
+  - Manages donor USDC deposits and yield generation
+- **`MerchantRegistry`** — `CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN`
+  - Verifies and manages humanitarian service providers
+- **`ImpactContract`** — `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY`
+  - Handles yield distribution and proof validation
+- **`ImpactCreditNFT`** — `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2`
+  - Mints NFTs as proof of impact delivery
+- **`DonorBadgeNFT`** — `CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL`
   - Rewards donors with achievement badges
 
 #### How Smart Contracts Work
