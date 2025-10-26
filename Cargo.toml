@@ -8,6 +8,7 @@ members = [
     "contracts/merchant_registry",
     "contracts/impact_credit_nft",
     "contracts/mock_usdc",
+    "contracts/donor_badge_nft",
 ]
 
 [workspace.dependencies]

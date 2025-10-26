@@ -1,10 +1,12 @@
 // No longer need useState for error handling
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { WalletProvider, useWallet } from "./hooks/useWallet";
-import DonorDashboard from "./pages/DonorDashboard";
+import DonorApp from "./pages/DonorApp";
+import DonorLeaderboard from "./pages/DonorLeaderboard";
+import DonorImpact from "./pages/DonorImpact";
+import MerchantApp from "./pages/MerchantApp";
 import BeneficiaryApp from "./pages/BeneficiaryApp";
 import MerchantPOS from "./pages/MerchantPOS";
-import MerchantPortal from "./pages/MerchantPortal";
 import Home from "./pages/Home";
 import DiagnosticPage from "./pages/DiagnosticPage";
 
@@ -27,6 +29,12 @@ function Navigation() {
                 Donors
               </Link>
               <Link
+                to="/merchant-portal"
+                className="text-gray-700 hover:text-gray-900 transition"
+              >
+                Service Providers
+              </Link>
+              <Link
                 to="/beneficiary"
                 className="text-gray-700 hover:text-gray-900 transition"
               >
@@ -37,12 +45,6 @@ function Navigation() {
                 className="text-gray-700 hover:text-gray-900 transition"
               >
                 POS
-              </Link>
-              <Link
-                to="/merchant-portal"
-                className="text-gray-700 hover:text-gray-900 transition"
-              >
-                Service Providers
               </Link>
             </div>
           </div>
@@ -86,14 +88,47 @@ function App() {
     <Router>
       <WalletProvider>
         <div className="min-h-screen bg-white">
-          <Navigation />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/donor" element={<DonorDashboard />} />
-            <Route path="/beneficiary" element={<BeneficiaryApp />} />
-            <Route path="/merchant" element={<MerchantPOS />} />
-            <Route path="/merchant-portal" element={<MerchantPortal />} />
-            <Route path="/diagnostic" element={<DiagnosticPage />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Navigation />
+                  <Home />
+                </>
+              }
+            />
+            <Route path="/donor" element={<DonorApp />} />
+            <Route path="/donor/leaderboard" element={<DonorLeaderboard />} />
+            <Route path="/donor/impact" element={<DonorImpact />} />
+            <Route path="/merchant-portal" element={<MerchantApp />} />
+            <Route
+              path="/beneficiary"
+              element={
+                <>
+                  <Navigation />
+                  <BeneficiaryApp />
+                </>
+              }
+            />
+            <Route
+              path="/merchant"
+              element={
+                <>
+                  <Navigation />
+                  <MerchantPOS />
+                </>
+              }
+            />
+            <Route
+              path="/diagnostic"
+              element={
+                <>
+                  <Navigation />
+                  <DiagnosticPage />
+                </>
+              }
+            />
           </Routes>
         </div>
       </WalletProvider>

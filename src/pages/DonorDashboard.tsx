@@ -24,6 +24,8 @@ export default function DonorDashboard() {
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [selectedCause, setSelectedCause] = useState(null);
   const [causeDepositAmount, setCauseDepositAmount] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [activePrograms, setActivePrograms] = useState([
     {
       id: 1,
@@ -32,10 +34,13 @@ export default function DonorDashboard() {
         "Emergency medical aid and food assistance for earthquake victims",
       totalRaised: 125000,
       totalDonors: 342,
-      impact: "1,250 families helped",
+      impactNumber: "1,250",
+      impactText: "families helped",
       status: "Active",
       category: "Emergency Relief",
       target: 200000,
+      protocol: "Blend",
+      protocolLogo: "/blend.png",
       socialLinks: {
         twitter: "https://x.com/nepalrelief",
         instagram: "https://instagram.com/nepalrelief",
@@ -47,10 +52,13 @@ export default function DonorDashboard() {
       description: "Free education and training programs for refugee children",
       totalRaised: 89000,
       totalDonors: 156,
-      impact: "450 children enrolled",
+      impactNumber: "450",
+      impactText: "children enrolled",
       status: "Active",
       category: "Education",
       target: 150000,
+      protocol: "Aquarius",
+      protocolLogo: "/aquarious.png",
       socialLinks: {
         twitter: "https://x.com/syrianeducation",
         instagram: "https://instagram.com/syrianeducation",
@@ -62,10 +70,13 @@ export default function DonorDashboard() {
       description: "Critical medical supplies and treatment for war victims",
       totalRaised: 234000,
       totalDonors: 567,
-      impact: "3,200 patients treated",
+      impactNumber: "3,200",
+      impactText: "patients treated",
       status: "Active",
       category: "Healthcare",
       target: 300000,
+      protocol: "Blend",
+      protocolLogo: "/blend.png",
       socialLinks: {
         twitter: "https://x.com/ukrainemedical",
         instagram: "https://instagram.com/ukrainemedical",
@@ -83,8 +94,11 @@ export default function DonorDashboard() {
 
   const loadBalances = async () => {
     try {
+      console.log("Loading balances for account:", publicKey);
       const server = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
       const account = await server.loadAccount(publicKey!);
+
+      console.log("Account balances:", account.balances);
 
       // Get XLM balance
       const xlmBalance = account.balances.find(
@@ -94,16 +108,35 @@ export default function DonorDashboard() {
         setBalance(parseFloat(xlmBalance.balance).toFixed(2));
       }
 
-      // Get USDC balance
+      // Get USDC balance - check all non-native assets
+      const nonNativeBalances = account.balances.filter(
+        (b: any) => b.asset_type !== "native"
+      );
+      console.log("Non-native balances (tokens):", nonNativeBalances);
+
       const usdcBal = account.balances.find(
         (b: any) => b.asset_type !== "native" && b.asset_code === "USDC"
       );
       if (usdcBal) {
-        setUsdcBalance(parseFloat(usdcBal.balance).toFixed(2));
+        const usdcBalanceValue = parseFloat(usdcBal.balance).toFixed(2);
+        console.log("USDC balance found:", usdcBalanceValue);
+        console.log("USDC asset details:", usdcBal);
+        setUsdcBalance(usdcBalanceValue);
+      } else {
+        console.log("No USDC balance found, setting to 0");
+        setUsdcBalance("0.00");
       }
     } catch (error) {
       console.error("Error loading balances:", error);
     }
+  };
+
+  const showSuccessToast = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
   };
 
   const loadVaultStats = async () => {
@@ -199,18 +232,93 @@ export default function DonorDashboard() {
   const handleDeposit = async () => {
     if (!publicKey || !depositAmount) return;
 
+    // Get real-time USDC balance from the token contract
+    const depositAmountStroops = Math.floor(
+      parseFloat(depositAmount) * 1000000
+    );
+
+    // Create sorobanServer for the entire function
+    const sorobanServer = new StellarSdk.SorobanRpc.Server(NETWORK.rpcUrl, {
+      allowHttp: false,
+    });
+
     try {
       setLoading(true);
+      setTxStatus("Checking USDC balance...");
+
+      // Try token contract first, fallback to Horizon if it fails
+      let currentUsdcBalance = "0.00";
+      let currentUsdcBalanceStroops = 0;
+
+      try {
+        const usdcContract = new StellarSdk.Contract(USDC_TOKEN);
+        const balanceCall = usdcContract.call(
+          "balance",
+          StellarSdk.Address.fromString(publicKey).toScVal()
+        );
+
+        // Build a simple transaction to get the balance
+        const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
+        const account = await horizonServer.loadAccount(publicKey);
+
+        const tempTx = new StellarSdk.TransactionBuilder(account, {
+          fee: StellarSdk.BASE_FEE,
+          networkPassphrase: NETWORK.networkPassphrase,
+        })
+          .addOperation(balanceCall)
+          .setTimeout(30)
+          .build();
+
+        const balanceResult = await sorobanServer.simulateTransaction(tempTx);
+        const balanceStroops = parseInt(
+          balanceResult.result?.toString() || "0"
+        );
+
+        if (!isNaN(balanceStroops) && balanceStroops > 0) {
+          currentUsdcBalanceStroops = balanceStroops;
+          currentUsdcBalance = (balanceStroops / 1000000).toFixed(2);
+        } else {
+          throw new Error("Invalid balance from contract");
+        }
+      } catch (contractError) {
+        console.log(
+          "Contract balance check failed, using Horizon balance:",
+          contractError
+        );
+
+        // Fallback to Horizon balance
+        const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
+        const account = await horizonServer.loadAccount(publicKey);
+
+        const usdcBal = account.balances.find(
+          (b: any) => b.asset_type !== "native" && b.asset_code === "USDC"
+        );
+        if (usdcBal) {
+          currentUsdcBalance = parseFloat(usdcBal.balance).toFixed(2);
+          currentUsdcBalanceStroops = Math.floor(
+            parseFloat(currentUsdcBalance) * 1000000
+          );
+        }
+      }
+
+      console.log(
+        `Real-time balance check: Deposit ${depositAmount} USDC (${depositAmountStroops} stroops), Available ${currentUsdcBalance} USDC (${currentUsdcBalanceStroops} stroops)`
+      );
+
+      if (depositAmountStroops > currentUsdcBalanceStroops) {
+        setTxStatus(
+          `❌ Error: Insufficient USDC balance. You have ${currentUsdcBalance} USDC, trying to deposit ${depositAmount} USDC.`
+        );
+        setLoading(false);
+        return;
+      }
+
       setTxStatus("Building transaction...");
 
-      // Use Horizon for account loading
+      // Use existing sorobanServer from balance check
+      // Load account for transaction building
       const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
       const account = await horizonServer.loadAccount(publicKey);
-
-      // Use SorobanRpc for contract invocations
-      const sorobanServer = new StellarSdk.SorobanRpc.Server(NETWORK.rpcUrl, {
-        allowHttp: false,
-      });
 
       // Convert amount to stroops (1 USDC = 10,000,000 stroops)
       const amountInStroops = Math.floor(parseFloat(depositAmount) * 1e7);
@@ -218,7 +326,8 @@ export default function DonorDashboard() {
       // Build contract invocation
       const contract = new StellarSdk.Contract(CONTRACTS.IMPACT_VAULT);
 
-      // Build transaction
+      // Build transaction with single deposit operation
+      // The ImpactVault deposit function should handle the USDC transfer internally
       const builtTransaction = new StellarSdk.TransactionBuilder(account, {
         fee: "100000", // Higher fee for Soroban
         networkPassphrase: NETWORK.networkPassphrase,
@@ -361,6 +470,9 @@ export default function DonorDashboard() {
                   await new Promise((resolve) => setTimeout(resolve, 3000));
                   await loadBalances();
                   await loadVaultStats(); // Refresh vault stats
+                  showSuccessToast(
+                    `🎉 Successfully deposited $${depositAmount} USDC! Your impact is growing.`
+                  );
                   console.log(
                     "View on explorer:",
                     `https://stellar.expert/explorer/testnet/tx/${sendResponse.hash}`
@@ -391,7 +503,23 @@ export default function DonorDashboard() {
       }
     } catch (error: any) {
       console.error("Deposit error:", error);
-      setTxStatus(`❌ Error: ${error.message || "Transaction failed"}`);
+
+      // Handle specific contract errors
+      if (
+        error.message.includes(
+          "resulting balance is not within the allowed range"
+        )
+      ) {
+        setTxStatus(
+          "❌ Error: Insufficient USDC balance. Please check your wallet and try a smaller amount."
+        );
+      } else if (error.message.includes("contract call failed")) {
+        setTxStatus(
+          "❌ Error: Transaction failed. Please check your USDC balance and try again."
+        );
+      } else {
+        setTxStatus(`❌ Error: ${error.message || "Transaction failed"}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -400,18 +528,93 @@ export default function DonorDashboard() {
   const handleCauseDeposit = async () => {
     if (!publicKey || !causeDepositAmount) return;
 
+    // Get real-time USDC balance from the token contract
+    const depositAmountStroops = Math.floor(
+      parseFloat(causeDepositAmount) * 1000000
+    );
+
+    // Create sorobanServer for the entire function
+    const sorobanServer = new StellarSdk.SorobanRpc.Server(NETWORK.rpcUrl, {
+      allowHttp: false,
+    });
+
     try {
       setLoading(true);
+      setTxStatus("Checking USDC balance...");
+
+      // Try token contract first, fallback to Horizon if it fails
+      let currentUsdcBalance = "0.00";
+      let currentUsdcBalanceStroops = 0;
+
+      try {
+        const usdcContract = new StellarSdk.Contract(USDC_TOKEN);
+        const balanceCall = usdcContract.call(
+          "balance",
+          StellarSdk.Address.fromString(publicKey).toScVal()
+        );
+
+        // Build a simple transaction to get the balance
+        const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
+        const account = await horizonServer.loadAccount(publicKey);
+
+        const tempTx = new StellarSdk.TransactionBuilder(account, {
+          fee: StellarSdk.BASE_FEE,
+          networkPassphrase: NETWORK.networkPassphrase,
+        })
+          .addOperation(balanceCall)
+          .setTimeout(30)
+          .build();
+
+        const balanceResult = await sorobanServer.simulateTransaction(tempTx);
+        const balanceStroops = parseInt(
+          balanceResult.result?.toString() || "0"
+        );
+
+        if (!isNaN(balanceStroops) && balanceStroops > 0) {
+          currentUsdcBalanceStroops = balanceStroops;
+          currentUsdcBalance = (balanceStroops / 1000000).toFixed(2);
+        } else {
+          throw new Error("Invalid balance from contract");
+        }
+      } catch (contractError) {
+        console.log(
+          "Contract balance check failed, using Horizon balance:",
+          contractError
+        );
+
+        // Fallback to Horizon balance
+        const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
+        const account = await horizonServer.loadAccount(publicKey);
+
+        const usdcBal = account.balances.find(
+          (b: any) => b.asset_type !== "native" && b.asset_code === "USDC"
+        );
+        if (usdcBal) {
+          currentUsdcBalance = parseFloat(usdcBal.balance).toFixed(2);
+          currentUsdcBalanceStroops = Math.floor(
+            parseFloat(currentUsdcBalance) * 1000000
+          );
+        }
+      }
+
+      console.log(
+        `Real-time balance check: Deposit ${causeDepositAmount} USDC (${depositAmountStroops} stroops), Available ${currentUsdcBalance} USDC (${currentUsdcBalanceStroops} stroops)`
+      );
+
+      if (depositAmountStroops > currentUsdcBalanceStroops) {
+        setTxStatus(
+          `❌ Error: Insufficient USDC balance. You have ${currentUsdcBalance} USDC, trying to deposit ${causeDepositAmount} USDC.`
+        );
+        setLoading(false);
+        return;
+      }
+
       setTxStatus("Building transaction...");
 
-      // Use Horizon for account loading
+      // Use existing sorobanServer from balance check
+      // Load account for transaction building
       const horizonServer = new StellarSdk.Horizon.Server(NETWORK.horizonUrl);
       const account = await horizonServer.loadAccount(publicKey);
-
-      // Use SorobanRpc for contract invocations
-      const sorobanServer = new StellarSdk.SorobanRpc.Server(NETWORK.rpcUrl, {
-        allowHttp: false,
-      });
 
       // Convert amount to stroops (1 USDC = 10,000,000 stroops)
       const amountInStroops = Math.floor(parseFloat(causeDepositAmount) * 1e7);
@@ -419,7 +622,12 @@ export default function DonorDashboard() {
       // Build contract invocation
       const contract = new StellarSdk.Contract(CONTRACTS.IMPACT_VAULT);
 
-      // Build transaction
+      console.log("Using USDC token contract:", USDC_TOKEN);
+      console.log("Using ImpactVault contract:", CONTRACTS.IMPACT_VAULT);
+      console.log("Deposit amount in stroops:", amountInStroops);
+
+      // Build transaction with single deposit operation
+      // The ImpactVault deposit function should handle the USDC transfer internally
       const builtTransaction = new StellarSdk.TransactionBuilder(account, {
         fee: "100000", // Higher fee for Soroban
         networkPassphrase: NETWORK.networkPassphrase,
@@ -512,8 +720,17 @@ export default function DonorDashboard() {
               console.log("Transaction confirmed!");
               setTxStatus("✅ Transaction confirmed! Refreshing...");
               await new Promise((resolve) => setTimeout(resolve, 2000));
+
+              console.log(
+                "Refreshing balances after successful transaction..."
+              );
               await loadBalances();
               await loadVaultStats();
+
+              console.log(
+                "Balance refresh complete. New USDC balance:",
+                usdcBalance
+              );
               console.log(
                 "View on explorer:",
                 `https://stellar.expert/explorer/testnet/tx/${sendResponse.hash}`
@@ -550,6 +767,9 @@ export default function DonorDashboard() {
                   await new Promise((resolve) => setTimeout(resolve, 3000));
                   await loadBalances();
                   await loadVaultStats(); // Refresh vault stats
+                  showSuccessToast(
+                    `🎉 Successfully deposited $${depositAmount} USDC! Your impact is growing.`
+                  );
                   console.log(
                     "View on explorer:",
                     `https://stellar.expert/explorer/testnet/tx/${sendResponse.hash}`
@@ -645,7 +865,28 @@ export default function DonorDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-semibold mb-8 text-gray-900">Impact Hub</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-semibold text-gray-900">Impact Hub</h1>
+          <p className="text-gray-600 font-normal mt-2">
+            Track how your yield is changing lives in real time.
+          </p>
+        </div>
+        {publicKey && (
+          <div className="flex items-center space-x-4">
+            <div className="bg-gray-50 rounded-lg px-3 py-2">
+              <span className="text-sm text-gray-700 font-medium">
+                {balance} XLM
+              </span>
+            </div>
+            <div className="bg-gray-50 rounded-lg px-3 py-2">
+              <span className="text-sm text-gray-700 font-medium">
+                {usdcBalance} USDC
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Your Impact - Moved to Top for Emotional Connection */}
       {publicKey ? (
@@ -653,64 +894,63 @@ export default function DonorDashboard() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-4xl font-light mb-3 text-gray-900 tracking-tight">
-                Your Impact Story
+                Your Impact Journey
               </h2>
               <p className="text-gray-700 text-xl leading-relaxed">
-                Every dollar you deposit creates a ripple of hope across the
-                world
+                Every dollar you deposit sends ripples of change worldwide.
               </p>
             </div>
             <div className="text-right">
               <div className="text-gray-600 text-sm mb-2 font-medium">
                 Your Contribution
               </div>
-              <div className="text-3xl font-light text-gray-900">
+              <div className="text-4xl font-light text-gray-900">
                 ${myDepositBalance}
               </div>
-              <div className="text-sm text-gray-500">Making a difference</div>
+              <div className="text-sm text-gray-500 flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                Your deposits have powered real aid today.
+              </div>
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300">
-              <div className="text-5xl font-light mb-4 text-gray-900">12</div>
-              <div className="text-gray-800 text-lg font-medium mb-2">
-                Humanitarian Programs
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300 shadow-md">
+              <div className="text-6xl font-bold mb-4 text-blue-600">12</div>
+              <div className="text-gray-800 text-lg font-medium mb-2 flex items-center justify-center">
+                <span className="mr-2">❤️</span>
+                12 Active Aid Programs
               </div>
               <div className="text-sm text-gray-600">
-                Directly funded by your yield
+                Powered entirely by your earned yield.
               </div>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300">
-              <div className="text-5xl font-light mb-4 text-gray-900">847</div>
-              <div className="text-gray-800 text-lg font-medium mb-2">
-                Lives Transformed
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300 shadow-md">
+              <div className="text-6xl font-bold mb-4 text-green-600">167</div>
+              <div className="text-gray-800 text-lg font-medium mb-2 flex items-center justify-center">
+                <span className="mr-2">👥</span>
+                167 Lives Changed
               </div>
               <div className="text-sm text-gray-600">
-                Real people, real impact
+                Real people, real impact.
               </div>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300">
-              <div className="text-5xl font-light mb-4 text-gray-900">156</div>
-              <div className="text-gray-800 text-lg font-medium mb-2">
-                Services Delivered
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-300/60 hover:shadow-lg transition-all duration-300 shadow-md">
+              <div className="text-6xl font-bold mb-4 text-orange-600">21</div>
+              <div className="text-gray-800 text-lg font-medium mb-2 flex items-center justify-center">
+                <span className="mr-2">🤝</span>
+                21 Services Funded
               </div>
               <div className="text-sm text-gray-600">
-                Medical, food, education aid
+                Healthcare • Nutrition • Education.
               </div>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-gray-700 text-sm leading-relaxed">
-              Your deposits don't just sit idle—they generate yield that
-              automatically funds
-              <span className="font-semibold text-gray-900">
-                {" "}
-                verified humanitarian services
-              </span>
-              . Every transaction creates a chain of impact that you can track
-              in real-time.
+              Your deposits keep generating yield — and that yield keeps funding
+              verified aid programs. Impact grows even while you sleep.
             </p>
           </div>
         </div>
@@ -733,24 +973,6 @@ export default function DonorDashboard() {
         </div>
       )}
 
-      {/* Account Info - Only show when wallet is connected */}
-      {publicKey && (
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
-            <div className="text-gray-600 text-sm mb-2">XLM Balance</div>
-            <div className="text-3xl font-semibold text-gray-900">
-              {balance}
-            </div>
-          </div>
-          <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6">
-            <div className="text-gray-600 text-sm mb-2">USDC Balance</div>
-            <div className="text-3xl font-semibold text-gray-900">
-              {usdcBalance}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Active Humanitarian Programs - Only show when wallet is connected */}
       {publicKey && (
         <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6 mb-8">
@@ -761,9 +983,7 @@ export default function DonorDashboard() {
             </button>
           </div>
           <p className="text-gray-600 mb-6">
-            Select a cause that resonates with you. Your donation will generate
-            yield that automatically funds verified humanitarian services in
-            that specific area.
+            Choose Where Your Yield Makes a Difference
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             {activePrograms.map((program) => {
@@ -790,12 +1010,20 @@ export default function DonorDashboard() {
                   )}
 
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <span className="text-sm font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded-full">
                       {program.category}
                     </span>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      {program.status}
-                    </span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs text-gray-400">Powered by:</span>
+                      <img
+                        src={program.protocolLogo}
+                        alt={program.protocol}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-xs text-gray-500">
+                        {program.protocol}
+                      </span>
+                    </div>
                   </div>
 
                   <h3 className="font-bold text-xl mb-2 text-gray-800">
@@ -807,15 +1035,12 @@ export default function DonorDashboard() {
 
                   {/* Progress Bar */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600">Progress</span>
-                      <span className="font-semibold text-gray-800">
-                        {Math.round(progress)}%
-                      </span>
+                    <div className="flex justify-center text-lg font-bold text-green-600 mb-2">
+                      {Math.round(progress)}% Funded
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+                        className="bg-green-500 h-3 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(progress, 100)}%` }}
                       ></div>
                     </div>
@@ -829,15 +1054,13 @@ export default function DonorDashboard() {
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="text-center">
                       <div className="text-lg font-bold text-blue-600">
-                        {program.totalDonors}
+                        👥 {program.totalDonors} Donors
                       </div>
-                      <div className="text-xs text-gray-600">Donors</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-green-600">
-                        {program.impact}
+                        💚 {program.impactNumber} {program.impactText}
                       </div>
-                      <div className="text-xs text-gray-600">Impact</div>
                     </div>
                   </div>
 
@@ -888,19 +1111,20 @@ export default function DonorDashboard() {
 
       {/* Active Deposits - Only show when wallet is connected */}
       {publicKey && (
-        <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6 mb-8">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-300 rounded-2xl shadow-sm p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-900">
-            Active Deposits
+            Your Active Impact Pool
           </h2>
           <div className="text-center">
             <div className="text-4xl font-light text-gray-900 mb-2">
               ${myDepositBalance}
             </div>
             <div className="text-gray-700 text-lg">
-              Your current deposit balance
+              This balance is generating yield for humanitarian programs right
+              now.
             </div>
             <div className="text-sm text-gray-600 mt-2">
-              Generating yield for humanitarian impact
+              Total Impact Generated: $47.50 Yield
             </div>
           </div>
         </div>
@@ -968,15 +1192,20 @@ export default function DonorDashboard() {
               <label className="block text-sm font-medium text-gray-800 mb-2">
                 Donation Amount (USDC)
               </label>
-              <input
-                type="number"
-                value={causeDepositAmount}
-                onChange={(e) => setCauseDepositAmount(e.target.value)}
-                placeholder="Enter donation amount"
-                className="w-full px-4 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                min="0"
-                step="0.01"
-              />
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  value={causeDepositAmount}
+                  onChange={(e) => setCauseDepositAmount(e.target.value)}
+                  placeholder="Enter donation amount"
+                  className="flex-1 px-4 py-3 border border-gray-400 rounded-lg focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                  min="0"
+                  step="0.01"
+                />
+                <div className="px-4 py-3 border border-gray-400 rounded-lg bg-gray-100 text-gray-600">
+                  USDC
+                </div>
+              </div>
             </div>
 
             <button
@@ -992,7 +1221,7 @@ export default function DonorDashboard() {
             </button>
 
             <p className="text-xs text-gray-500 text-center">
-              Your donation will generate yield to fund this cause
+              Support this cause with your donation
             </p>
 
             {txStatus && (
@@ -1008,6 +1237,50 @@ export default function DonorDashboard() {
                 {txStatus}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {showToast && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+          <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl p-8 max-w-md mx-4 animate-scale-in">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-4xl">🎉</span>
+                </div>
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                Deposit Successful!
+              </h3>
+              <p className="text-gray-600 text-lg mb-8">{toastMessage}</p>
+              <div className="mb-8">
+                <span className="text-sm text-gray-500 block mb-4">
+                  Share your impact:
+                </span>
+                <div className="flex justify-center space-x-4">
+                  <button className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition transform hover:scale-110">
+                    <span className="text-white text-lg">𝕏</span>
+                  </button>
+                  <button className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center hover:bg-pink-600 transition transform hover:scale-110">
+                    <span className="text-white text-lg">📷</span>
+                  </button>
+                  <button className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition transform hover:scale-110">
+                    <span className="text-white text-lg">f</span>
+                  </button>
+                  <button className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition transform hover:scale-110">
+                    <span className="text-white text-lg">💬</span>
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowToast(false)}
+                className="bg-gray-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition"
+              >
+                Continue
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-white to-gray-100 py-32">
+      <div className="bg-gradient-to-b from-white to-gray-100 pt-16 pb-32">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-block bg-gray-200/90 backdrop-blur-sm rounded-full px-6 py-3 mb-8 text-sm font-medium text-gray-800 border border-gray-300/70">
             Built for Stellar Hackathon 2025
@@ -16,49 +16,56 @@ export default function Home() {
             AidLoop
           </h1>
           <p className="text-3xl md:text-4xl mb-6 font-light text-gray-800 leading-tight">
-            Yield-Powered Humanitarian Funding
+            Fund Impact Without Spending a Dollar
           </p>
-          <p className="text-xl mb-12 text-gray-700 max-w-4xl mx-auto leading-relaxed">
-            Turn your stablecoin yield into verifiable social impact.
-            <span className="font-medium text-gray-900">
-              {" "}
-              Stake once, fund impact forever.
-            </span>
+          <p className="text-xl mb-8 text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            Your USDC earns interest — the interest funds verified causes. Your
+            principal stays safe and withdrawable anytime.
           </p>
 
+          {/* Primary CTA */}
+          <div className="mb-12">
+            <Link
+              to="/donor"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              Start Funding Impact
+            </Link>
+          </div>
+
           {/* USP Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gray-200 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <div className="text-2xl">💳</div>
+          <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto mb-16">
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
+              <div className="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center mb-8 mx-auto">
+                <div className="text-3xl">💳</div>
               </div>
               <h3 className="text-xl font-medium mb-4 text-gray-900">
-                Keep Your Principal
+                Keep What You Give
               </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Your USDC stays safe and withdrawable at any time
+              <p className="text-gray-600 leading-relaxed">
+                Your deposit stays safe and withdrawable anytime.
               </p>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gray-200 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <div className="text-2xl">⚡</div>
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
+              <div className="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center mb-8 mx-auto">
+                <div className="text-3xl">⚡</div>
               </div>
               <h3 className="text-xl font-medium mb-4 text-gray-900">
-                Yield Funds Impact
+                Your Yield Changes Lives
               </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Only generated yield funds humanitarian aid programs
+              <p className="text-gray-600 leading-relaxed">
+                Only the interest funds verified humanitarian programs.
               </p>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-10 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gray-200 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <div className="text-2xl">🔗</div>
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-300/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-105">
+              <div className="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center mb-8 mx-auto">
+                <div className="text-3xl">🔗</div>
               </div>
               <h3 className="text-xl font-medium mb-4 text-gray-900">
-                On-Chain Proof
+                See Real Impact On-Chain
               </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Every impact verified with Impact Credit NFTs
+              <p className="text-gray-600 leading-relaxed">
+                Every funded service creates a public proof of impact.
               </p>
             </div>
           </div>
@@ -429,6 +436,15 @@ export default function Home() {
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Emotional Tagline */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-2xl md:text-3xl font-light text-white italic">
+            AidLoop — where your yield becomes someone's hope.
+          </p>
         </div>
       </div>
     </div>

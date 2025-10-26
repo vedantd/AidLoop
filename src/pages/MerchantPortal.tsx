@@ -302,16 +302,26 @@ export default function MerchantPortal() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-semibold mb-8 text-gray-900">
-        {merchantInfo?.name || "Service Provider"} - Dashboard
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-4xl font-semibold text-gray-900">
+          {merchantInfo?.name || "Service Provider"} - Dashboard
+        </h1>
+        <p className="text-gray-600 font-normal mt-2">
+          Track how your humanitarian services are making a real difference in
+          your community.
+        </p>
+      </div>
 
       {/* Aid Committed to This Business - Only show when wallet is connected */}
       {publicKey && (
-        <div className="bg-white border border-gray-300 rounded-2xl shadow-sm p-6 mb-8">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-300 rounded-2xl shadow-sm p-8 mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-900">
-            Aid Committed to Your Business
+            Your Humanitarian Impact Pool
           </h2>
+          <p className="text-gray-600 mb-6">
+            This balance represents verified aid funding available for your
+            humanitarian services.
+          </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-3xl font-semibold text-gray-900">$2,450</div>
@@ -440,36 +450,46 @@ export default function MerchantPortal() {
           {/* Merchant Dashboard */}
           <div className="grid lg:grid-cols-3 gap-8 mb-8">
             {/* Performance Metrics */}
-            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+            <div className="lg:col-span-2 bg-white border border-gray-300 rounded-2xl shadow-sm p-8">
               <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                Your Performance
+                Your Humanitarian Impact
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-3xl font-semibold text-gray-900">
+                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
                     {performanceMetrics.totalServices}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-700 flex items-center justify-center">
+                    <span className="mr-2">🤝</span>
                     Services Delivered
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-3xl font-semibold text-gray-900">
+                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200">
+                  <div className="text-4xl font-bold text-green-600 mb-2">
                     ${performanceMetrics.totalEarnings}
                   </div>
-                  <div className="text-sm text-gray-600">Total Earnings</div>
+                  <div className="text-sm text-gray-700 flex items-center justify-center">
+                    <span className="mr-2">💰</span>
+                    Total Earnings
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-3xl font-semibold text-gray-900">
+                <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl border border-yellow-200">
+                  <div className="text-4xl font-bold text-yellow-600 mb-2">
                     {performanceMetrics.rating}
                   </div>
-                  <div className="text-sm text-gray-600">Rating</div>
+                  <div className="text-sm text-gray-700 flex items-center justify-center">
+                    <span className="mr-2">⭐</span>
+                    Rating
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-3xl font-semibold text-gray-900">
+                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200">
+                  <div className="text-4xl font-bold text-purple-600 mb-2">
                     {performanceMetrics.completionRate}%
                   </div>
-                  <div className="text-sm text-gray-600">Completion Rate</div>
+                  <div className="text-sm text-gray-700 flex items-center justify-center">
+                    <span className="mr-2">🎯</span>
+                    Completion Rate
+                  </div>
                 </div>
               </div>
             </div>

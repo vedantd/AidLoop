@@ -72,6 +72,54 @@ impl ImpactVault {
         new_balance
     }
 
+    /// Deposit XLM into the vault
+    /// Returns the total balance after deposit
+    pub fn deposit_xlm(env: Env, donor: Address, amount: i128) -> i128 {
+        // Verify donor authorization
+        donor.require_auth();
+
+        // For XLM deposits, we need to handle native XLM differently
+        // This is a simplified version - in practice, XLM handling in Soroban
+        // requires special considerations for native asset transfers
+
+        // Update donor balance (treating XLM as a separate balance)
+        let donor_key = (symbol_short!("xlm_bal"), donor.clone());
+        let current_balance: i128 = env.storage().instance().get(&donor_key).unwrap_or(0);
+
+        let new_balance = current_balance + amount;
+        env.storage().instance().set(&donor_key, &new_balance);
+
+        // Update total XLM deposits
+        let total_xlm: i128 = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("total_xlm"))
+            .unwrap_or(0);
+        env.storage()
+            .instance()
+            .set(&symbol_short!("total_xlm"), &(total_xlm + amount));
+
+        // Emit deposit event
+        env.events()
+            .publish((symbol_short!("deposit_xlm"), donor), amount);
+
+        new_balance
+    }
+
+    /// Get donor's XLM balance
+    pub fn get_xlm_balance(env: Env, donor: Address) -> i128 {
+        let donor_key = (symbol_short!("xlm_bal"), donor);
+        env.storage().instance().get(&donor_key).unwrap_or(0)
+    }
+
+    /// Get total XLM deposits in the vault
+    pub fn get_total_xlm_deposits(env: Env) -> i128 {
+        env.storage()
+            .instance()
+            .get(&symbol_short!("total_xlm"))
+            .unwrap_or(0)
+    }
+
     /// Get donor's balance
     pub fn get_balance(env: Env, donor: Address) -> i128 {
         let donor_key = (symbol_short!("balance"), donor);
