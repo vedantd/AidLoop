@@ -28,13 +28,81 @@ Stellar's unique architecture makes AidLoop possible:
 ## 🛠️ Technical Implementation
 
 ### Smart Contract Architecture (Rust/Soroban)
+
+#### Core Contract Addresses (Stellar Testnet)
+```
+ImpactVault:        CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW
+MerchantRegistry:   CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN  
+DonorBadgeNFT:     CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL
+```
+
+**🔗 View on Stellar Explorer**: [stellar.expert/explorer/testnet](https://stellar.expert/explorer/testnet)
+
+#### How Smart Contracts Work
+
+**1. ImpactVault Contract** - Central yield management
 ```rust
-// Core contracts deployed on Stellar Testnet
-- ImpactVault: CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW
-- MerchantRegistry: CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN  
-- ImpactContract: CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY
-- ImpactCreditNFT: CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2
-- DonorBadgeNFT: CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL
+// Core functions
+pub fn deposit(env: Env, donor: Address, amount: i128) -> i128
+pub fn deploy_to_defi(env: Env, protocol: String, amount: i128) -> bool
+pub fn withdraw_yield(env: Env, amount: i128) -> i128
+pub fn distribute_yield(env: Env, impact_contract: Address, amount: i128) -> bool
+```
+- Manages all donor USDC deposits
+- Deploys funds to DeFi protocols (Blend, Aquarius) for yield generation
+- Automatically withdraws and distributes yield to impact contracts
+- Ensures donor principal remains safe and withdrawable
+
+**2. MerchantRegistry Contract** - Service provider verification
+```rust
+// Core functions
+pub fn register_merchant(env: Env, business_name: String, category: String, document_hash: String) -> bool
+pub fn record_redemption(env: Env, merchant: Address, amount: i128) -> bool
+pub fn is_verified(env: Env, merchant: Address) -> bool
+```
+- Verifies humanitarian service providers (hospitals, schools, relief orgs)
+- Records service redemptions and tracks payments
+- Only verified providers can receive reimbursements
+
+**3. ImpactContract Contract** - Yield distribution and validation
+```rust
+// Core functions
+pub fn receive_yield(env: Env, from: Address, amount: i128) -> bool
+pub fn validate_proof(env: Env, proof_hash: String) -> bool
+pub fn process_reimbursement(env: Env, merchant: Address, amount: i128) -> bool
+```
+- Receives yield from ImpactVault
+- Validates service provider proofs
+- Processes automatic reimbursements
+
+**4. ImpactCreditNFT Contract** - Immutable impact proof
+```rust
+// Core functions
+pub fn mint_impact_credit(env: Env, to: Address, service_type: String, impact_description: String, proof_hash: String) -> u32
+pub fn get_impact_metadata(env: Env, token_id: u32) -> ImpactMetadata
+```
+- Mints NFTs as proof of humanitarian service delivery
+- Contains immutable metadata about impact
+- Enables transparent impact tracking
+
+**5. DonorBadgeNFT Contract** - Donor gamification
+```rust
+// Core functions
+pub fn mint_badge(env: Env, to: Address, badge_name: String, description: String, badge_type: String, rarity: String) -> u32
+pub fn get_badges_by_owner(env: Env, owner: Address) -> Vec<u32>
+```
+- Rewards donors with achievement badges
+- Gamifies humanitarian participation
+- Encourages continued engagement
+
+#### Contract Interaction Flow
+```
+1. Donor deposits USDC → ImpactVault
+2. ImpactVault deploys to DeFi → Yield generation  
+3. Service provider delivers aid → MerchantRegistry verification
+4. Proof submitted → ImpactContract validation
+5. Reimbursement processed → ImpactCreditNFT minted
+6. Donor receives badge → DonorBadgeNFT minted
 ```
 
 ### Key Stellar Features Utilized
@@ -75,21 +143,17 @@ Stellar's unique architecture makes AidLoop possible:
 - **Automated Reimbursement** — Smart contract-driven service provider payments
 - **Real-Time Tracking** — Live impact metrics and donor engagement
 
-## 📊 Impact Metrics
+## 📊 Live Deployment
 
-### Live Deployment Stats
-- **Total Contracts**: 6 deployed and initialized
-- **Active Donors**: 1,247 registered
-- **Service Providers**: 89 verified organizations
-- **Lives Impacted**: 2,340+ people helped
-- **Services Delivered**: 156 humanitarian services
-- **Total Yield Generated**: $47,500+ in funding
+### Core Smart Contracts
+The essential contracts powering AidLoop's humanitarian funding solution:
 
-### Real-World Impact Examples
-- **Medical Care**: 342 patients treated in earthquake zones
-- **Education**: 1,250 children provided school supplies  
-- **Emergency Relief**: 89 families received emergency shelter
-- **Nutrition**: 567 meals delivered to refugee camps
+- **ImpactVault**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW)
+  - *Manages donor USDC deposits and yield generation*
+- **MerchantRegistry**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN)
+  - *Registers humanitarian service providers and records redemptions*
+- **DonorBadgeNFT**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL)
+  - *Mints achievement badges for donors*
 
 ## 🚀 Demo & Links
 

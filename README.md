@@ -53,11 +53,151 @@ AidLoop leverages Stellar's unique capabilities to create a transparent, efficie
 ### Smart Contract Architecture
 
 #### Core Contracts
-- **`ImpactVault`** — Manages donor USDC deposits and yield generation
-- **`MerchantRegistry`** — Verifies and manages humanitarian service providers
-- **`ImpactContract`** — Handles yield distribution and proof validation
-- **`ImpactCreditNFT`** — Mints NFTs as proof of impact delivery
-- **`DonorBadgeNFT`** — Rewards donors with achievement badges
+- **`ImpactVault`** — `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW`
+  - Manages donor USDC deposits and yield generation
+- **`MerchantRegistry`** — `CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN`
+  - Verifies and manages humanitarian service providers
+- **`ImpactContract`** — `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY`
+  - Handles yield distribution and proof validation
+- **`ImpactCreditNFT`** — `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2`
+  - Mints NFTs as proof of impact delivery
+- **`DonorBadgeNFT`** — `CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL`
+  - Rewards donors with achievement badges
+
+#### How Smart Contracts Work
+
+##### 1. ImpactVault Contract
+**Purpose**: Central vault managing all donor deposits and yield generation
+
+**Key Functions**:
+```rust
+// Deposit USDC from donors
+pub fn deposit(env: Env, donor: Address, amount: i128) -> i128
+
+// Deploy funds to DeFi protocols for yield generation
+pub fn deploy_to_defi(env: Env, protocol: String, amount: i128) -> bool
+
+// Withdraw yield from DeFi protocols
+pub fn withdraw_yield(env: Env, amount: i128) -> i128
+
+// Distribute yield to impact contracts
+pub fn distribute_yield(env: Env, impact_contract: Address, amount: i128) -> bool
+```
+
+**Workflow**:
+1. Donors deposit USDC → Vault stores principal safely
+2. Vault deploys funds to DeFi protocols (Blend, Aquarius)
+3. Yield accumulates automatically through lending/borrowing
+4. Yield is withdrawn and distributed to impact contracts
+5. Donors can withdraw principal anytime
+
+##### 2. MerchantRegistry Contract
+**Purpose**: Verifies and manages humanitarian service providers
+
+**Key Functions**:
+```rust
+// Register new service provider
+pub fn register_merchant(
+    env: Env, 
+    business_name: String, 
+    category: String, 
+    document_hash: String
+) -> bool
+
+// Record service redemption/payment
+pub fn record_redemption(env: Env, merchant: Address, amount: i128) -> bool
+
+// Get merchant verification status
+pub fn is_verified(env: Env, merchant: Address) -> bool
+```
+
+**Workflow**:
+1. Service providers register with business details
+2. Documents are verified off-chain (IPFS integration)
+3. Verified providers can submit proof of service
+4. Contract records redemptions and tracks payments
+5. Only verified providers can receive reimbursements
+
+##### 3. ImpactContract Contract
+**Purpose**: Handles yield distribution and proof validation
+
+**Key Functions**:
+```rust
+// Receive yield from vault
+pub fn receive_yield(env: Env, from: Address, amount: i128) -> bool
+
+// Validate service proof
+pub fn validate_proof(env: Env, proof_hash: String) -> bool
+
+// Process reimbursement
+pub fn process_reimbursement(env: Env, merchant: Address, amount: i128) -> bool
+```
+
+**Workflow**:
+1. Receives yield from ImpactVault
+2. Validates service provider proofs
+3. Processes automatic reimbursements
+4. Tracks total impact generated
+
+##### 4. ImpactCreditNFT Contract
+**Purpose**: Mints NFTs as immutable proof of impact delivery
+
+**Key Functions**:
+```rust
+// Mint impact credit NFT
+pub fn mint_impact_credit(
+    env: Env,
+    to: Address,
+    service_type: String,
+    impact_description: String,
+    proof_hash: String
+) -> u32
+
+// Get NFT metadata
+pub fn get_impact_metadata(env: Env, token_id: u32) -> ImpactMetadata
+```
+
+**Workflow**:
+1. Service provider submits proof of humanitarian service
+2. Proof is validated by ImpactContract
+3. ImpactCreditNFT is automatically minted
+4. NFT contains immutable proof of impact
+5. Donors can view their impact through NFTs
+
+##### 5. DonorBadgeNFT Contract
+**Purpose**: Rewards donors with achievement badges
+
+**Key Functions**:
+```rust
+// Mint donor badge
+pub fn mint_badge(
+    env: Env,
+    to: Address,
+    badge_name: String,
+    description: String,
+    badge_type: String,
+    rarity: String
+) -> u32
+
+// Get donor's badges
+pub fn get_badges_by_owner(env: Env, owner: Address) -> Vec<u32>
+```
+
+**Workflow**:
+1. Donors achieve milestones (first donation, $1000 impact, etc.)
+2. Badges are automatically minted based on impact
+3. Donors can display badges on leaderboard
+4. Gamification encourages continued participation
+
+#### Contract Interaction Flow
+```
+1. Donor deposits USDC → ImpactVault
+2. ImpactVault deploys to DeFi → Yield generation
+3. Service provider delivers aid → MerchantRegistry verification
+4. Proof submitted → ImpactContract validation
+5. Reimbursement processed → ImpactCreditNFT minted
+6. Donor receives badge → DonorBadgeNFT minted
+```
 
 #### Key Features
 - **Multi-signature yield management** — Secure yield distribution
@@ -115,21 +255,26 @@ npm run dev
 ./initialize_contracts.sh
 ```
 
-## 📊 Impact Metrics
+### Core Contract Addresses (Stellar Testnet)
+```
+ImpactVault:        CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW
+MerchantRegistry:   CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN
+DonorBadgeNFT:     CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL
+```
 
-### Live on Stellar Testnet
-- **Total Contracts Deployed**: 6
-- **Active Donors**: 1,247
-- **Verified Service Providers**: 89
-- **Lives Impacted**: 2,340+
-- **Services Delivered**: 156
-- **Total Yield Generated**: $47,500+
+**View on Stellar Explorer**: [stellar.expert/explorer/testnet](https://stellar.expert/explorer/testnet)
 
-### Real Impact Examples
-- **Medical Care**: 342 patients treated in earthquake zones
-- **Education**: 1,250 children provided school supplies
-- **Emergency Relief**: 89 families received emergency shelter
-- **Nutrition**: 567 meals delivered to refugee camps
+## 📊 Live Deployment
+
+### Core Smart Contracts
+The essential contracts powering AidLoop's humanitarian funding solution:
+
+- **ImpactVault**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW)
+  - *Manages donor USDC deposits and yield generation*
+- **MerchantRegistry**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN)
+  - *Registers humanitarian service providers and records redemptions*
+- **DonorBadgeNFT**: [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL)
+  - *Mints achievement badges for donors*
 
 ## 🔗 Links & Resources
 
