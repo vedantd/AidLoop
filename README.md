@@ -21,7 +21,7 @@ AidLoop creates an **antifragile aid economy** that thrives in volatility. By le
 
 ## 🎬 Demo Video
 
-https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
+https://github.com/vedantd/AidLoop/blob/main/public/demo_compressed.mp4
 
 *Watch AidLoop in action: See how donors deposit USDC, yield generates automatically, and humanitarian services get funded transparently.*
 
