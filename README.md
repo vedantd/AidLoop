@@ -56,10 +56,6 @@ https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
 ![Dashboard Bottom](public/dashboardbottom.png)
 *Complete system overview and analytics*
 
-### DeFi Integration
-![Blend Protocol](public/blend.png)
-![Aquarius Protocol](public/aquarious.png)
-*Integration with DeFi protocols for yield generation*
 
 ## 🏗️ How It Works
 
