@@ -13,11 +13,11 @@
 
 | Contract | Address | Explorer Link | Purpose |
 |----------|---------|---------------|---------|
-| **ImpactVault** | `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW) | Manages donor USDC deposits and yield generation |
-| **MerchantRegistry** | `CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN) | Registers humanitarian service providers |
-| **DonorBadgeNFT** | `CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL) | Mints achievement badges for donors |
-| **ImpactContract** | `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY) | Handles yield distribution and validation |
-| **ImpactCreditNFT** | `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2) | Mints NFTs as proof of impact delivery |
+| **ImpactVault** | `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW) | Manages donor USDC deposits and yield distribution |
+| **ProgramManager** | `CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN) | Creates and manages aid programs |
+| **VoucherManager** | `CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG) | Tracks vouchers and merchant redemptions |
+| **MerchantRegistry** | `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY) | Verifies and manages merchants |
+| **ImpactCreditNFT** | `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2) | Proof-of-impact NFTs for ESG investors |
 
 ## 🎯 Problem & Solution
 
