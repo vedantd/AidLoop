@@ -40,21 +40,7 @@ https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
 
 ## 📸 Screenshots
 
-### Donor Dashboard
-![Donor Dashboard](https://github.com/vedantd/AidLoop/blob/main/public/donardd.png?raw=true)
-*Donor interface showing impact tracking and yield generation*
-
-### Donor Impact View
-![Donor Impact](https://github.com/vedantd/AidLoop/blob/main/public/donorss.png?raw=true)
-*Real-time impact metrics and transparency features*
-
-### Merchant Portal
-![Merchant Portal](https://github.com/vedantd/AidLoop/blob/main/public/merchant.png?raw=true)
-*Merchant interface for service provider registration and redemption*
-
-### Dashboard Overview
-![Dashboard Bottom](https://github.com/vedantd/AidLoop/blob/main/public/dashboardbottom.png?raw=true)
-*Complete system overview and analytics*
+Drive: `https://drive.google.com/drive/folders/15kya7f4fZ-L7ptPAd1jFlsLibYWjz-ti?usp=sharing`
 
 ## 🏗️ How It Works
 
