@@ -6,6 +6,19 @@
 [![Stellar Network](https://img.shields.io/badge/Network-Stellar%20Testnet-orange)](https://testnet.stellar.org)
 [![Soroban Smart Contracts](https://img.shields.io/badge/Platform-Soroban%20WASM-green)](https://soroban.stellar.org)
 
+## 🎨 Design System
+**[View Design System on Canva](https://www.canva.com/design/DAG25Z4jbbg/vp_IMiSj8FhP5rW2vY4yaw/edit)** — Complete UI/UX design system with components, colors, and layouts
+
+## 📋 Deployed Smart Contracts (Stellar Testnet)
+
+| Contract | Address | Explorer Link | Purpose |
+|----------|---------|---------------|---------|
+| **ImpactVault** | `CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW) | Manages donor USDC deposits and yield generation |
+| **MerchantRegistry** | `CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA4ED4DJ4T7BCP26A2GOVY5Z2CANXRM23DVPT352LQYMAJCSGF757GZN) | Registers humanitarian service providers |
+| **DonorBadgeNFT** | `CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCAIBIEJTVBB7A75YTBVBIJ2CBX2ZETDWBSL57P4TYLY4VZVN5DKKGWL) | Mints achievement badges for donors |
+| **ImpactContract** | `CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY) | Handles yield distribution and validation |
+| **ImpactCreditNFT** | `CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2` | [View on Explorer](https://stellar.expert/explorer/testnet/contract/CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2) | Mints NFTs as proof of impact delivery |
+
 ## 🎯 Problem & Solution
 
 ### The Problem
@@ -21,7 +34,7 @@ AidLoop creates an **antifragile aid economy** that thrives in volatility. By le
 
 ## 🎬 Demo Video
 
-https://github.com/vedantd/AidLoop/blob/main/public/demo_compressed.mp4
+https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
 
 *Watch AidLoop in action: See how donors deposit USDC, yield generates automatically, and humanitarian services get funded transparently.*
 
@@ -285,7 +298,6 @@ The essential contracts powering AidLoop's humanitarian funding solution:
 ## 🔗 Links & Resources
 
 - **Live Demo**: [aidloop-demo.stellar.org](https://aidloop-demo.stellar.org)
-- **Canva Design**: [View Design System](https://www.canva.com/design/DAG25Z4jbbg/vp_IMiSj8FhP5rW2vY4yaw/edit)
 - **Stellar Explorer**: [View Contracts](https://stellar.expert/explorer/testnet)
 - **Documentation**: [docs.aidloop.org](https://docs.aidloop.org)
 
