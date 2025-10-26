@@ -41,21 +41,25 @@ https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
 ## 📸 Screenshots
 
 ### Donor Dashboard
-![Donor Dashboard](public/donardd.png)
+![Donor Dashboard](https://github.com/vedantd/AidLoop/blob/main/public/donardd.png?raw=true)
 *Donor interface showing impact tracking and yield generation*
 
 ### Donor Impact View
-![Donor Impact](public/donorss.png)
+![Donor Impact](https://github.com/vedantd/AidLoop/blob/main/public/donorss.png?raw=true)
 *Real-time impact metrics and transparency features*
 
 ### Merchant Portal
-![Merchant Portal](public/merchant.png)
+![Merchant Portal](https://github.com/vedantd/AidLoop/blob/main/public/merchant.png?raw=true)
 *Merchant interface for service provider registration and redemption*
 
 ### Dashboard Overview
-![Dashboard Bottom](public/dashboardbottom.png)
+![Dashboard Bottom](https://github.com/vedantd/AidLoop/blob/main/public/dashboardbottom.png?raw=true)
 *Complete system overview and analytics*
 
+### DeFi Integration
+![Blend Protocol](https://github.com/vedantd/AidLoop/blob/main/public/blend.png?raw=true)
+![Aquarius Protocol](https://github.com/vedantd/AidLoop/blob/main/public/aquarious.png?raw=true)
+*Integration with DeFi protocols for yield generation*
 
 ## 🏗️ How It Works
 
