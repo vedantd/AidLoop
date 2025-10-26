@@ -19,6 +19,12 @@ AidLoop creates an **antifragile aid economy** that thrives in volatility. By le
 - **Impact is transparent** — Every service delivery mints an Impact Credit NFT on-chain
 - **Funding is perpetual** — Yield persists or grows, ensuring continuity even during economic stress
 
+## 🎬 Demo Video
+
+https://github.com/vedantd/AidLoop/blob/main/public/demo.mp4
+
+*Watch AidLoop in action: See how donors deposit USDC, yield generates automatically, and humanitarian services get funded transparently.*
+
 ## 🏗️ How It Works
 
 ### For Donors
