@@ -1,0 +1,30 @@
+ℹ️ Signing transaction: 27126c763f649764c601728107b1bc0074d5b76cba2d78bf588c13d5db591997
+
+error: unexpected argument '--vault' found
+
+Usage: initialize --admin <Address>
+
+For more information, try '--help'.
+error: unexpected argument '--program_manager' found
+
+Usage: initialize --admin <Address>
+
+For more information, try '--help'.
+ℹ️ Signing transaction: dd662354122f78a1819797865bd0ca671dccf4bf0032aab231f3ced872069439
+
+❌ error: Missing argument usdc_token
+ℹ️ Signing transaction: 206c20edb9d987c2e98eb6c85447af071fe175db106898c5ebdabe423602a2f1
+
+error: unexpected argument '--vault' found
+
+Usage: initialize --admin <Address>
+
+For more information, try '--help'.
+error: unexpected argument '--program_manager' found
+
+Usage: initialize --admin <Address>
+
+For more information, try '--help'.
+ℹ️ Signing transaction: 4dd1986c779837705957dc422e5d1adc8aff1133a24c465bed7fb1bd6424a291
+
+❌ error: Missing argument usdc_token

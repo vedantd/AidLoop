@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidLoop - Hybrid Demo (Works with Freighter!)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/11.2.2/stellar-sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        code {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🌍 AidLoop - Hybrid Demo</h1>
+            <p>This works around Chrome's Freighter localhost limitation!</p>
+        </div>
+
+        <!-- Step 1: Get Wallet Address -->
+        <div class="card">
+            <h2>Step 1: Connect Your Wallet</h2>
+            <p>Since Freighter won't inject into localhost, we'll do this manually:</p>
+            
+            <div class="step">
+                <strong>1. Open Freighter extension</strong> (click the icon in your toolbar)<br>
+                <strong>2. Click "Copy Address"</strong><br>
+                <strong>3. Paste it below:</strong>
+            </div>
+
+            <input type="text" id="wallet-address" placeholder="Paste your Stellar address here (starts with G...)" />
+            <button onclick="connectWallet()">Connect Wallet</button>
+            
+            <div id="wallet-status" class="hidden">
+                <p class="success">✓ Wallet Connected!</p>
+                <p><strong>Address:</strong> <span id="connected-address"></span></p>
+                <p><strong>Balance:</strong> <span id="wallet-balance">Loading...</span></p>
+            </div>
+        </div>
+
+        <!-- Step 2: Make Deposit -->
+        <div class="card hidden" id="deposit-section">
+            <h2>Step 2: Deposit USDC</h2>
+            
+            <div class="step">
+                <label>Amount (USDC):</label>
+                <input type="number" id="deposit-amount" value="100" min="1" step="0.01" />
+                <button onclick="prepareDeposit()">Prepare Deposit</button>
+            </div>
+
+            <div id="transaction-ready" class="hidden">
+                <h3>✅ Transaction Ready for Signing</h3>
+                <p><strong>Unsigned Transaction XDR:</strong></p>
+                <textarea id="unsigned-xdr" rows="4" readonly></textarea>
+                <button onclick="copyXDR()">📋 Copy XDR</button>
+                
+                <div class="step">
+                    <strong>How to sign with Freighter:</strong><br>
+                    <strong>Option 1: Use Stellar Laboratory (Recommended)</strong><br>
+                    1. Click "Copy XDR" above<br>
+                    2. Go to <a href="https://laboratory.stellar.org/#txsigner?network=test" target="_blank">Stellar Laboratory Transaction Signer</a><br>
+                    3. Paste the XDR in the "Import a transaction envelope in XDR format" box<br>
+                    4. Click "Sign with Freighter" button<br>
+                    5. Approve in Freighter popup<br>
+                    6. Copy the signed XDR from the bottom<br>
+                    7. Paste it below and submit<br><br>
+                    
+                    <strong>Option 2: Direct Submit (Simpler)</strong><br>
+                    Just click "Auto-Sign & Submit" below and approve in Freighter!
+                </div>
+
+                <textarea id="signed-xdr" rows="4" placeholder="Or paste signed XDR here if you used Laboratory"></textarea>
+                <button onclick="submitTransaction()">Submit Signed XDR</button>
+                <button onclick="autoSignAndSubmit()" style="background: #10b981;">🚀 Auto-Sign & Submit</button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="card">
+            <h2>Console</h2>
+            <div id="console" style="background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 8px; font-family: monospace; min-height: 200px; max-height: 400px; overflow-y: auto;">
+                <div>Welcome to AidLoop Hybrid Demo!</div>
+                <div>This works even when Freighter won't inject into localhost.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let walletAddress = null;
+        let server = null;
+        
+        // Initialize after page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('StellarSdk available:', typeof StellarSdk);
+            console.log('StellarSdk.Server available:', typeof StellarSdk?.Horizon?.Server);
+            
+            // Check if Stellar SDK loaded correctly
+            if (typeof StellarSdk === 'undefined') {
+                log('ERROR: Stellar SDK not loaded!', 'error');
+                return;
+            }
+            
+            try {
+                // Modern Stellar SDK uses Horizon.Server
+                if (StellarSdk.Horizon && StellarSdk.Horizon.Server) {
+                    server = new StellarSdk.Horizon.Server('https://horizon-testnet.stellar.org');
+                    log('Stellar SDK initialized (Horizon.Server)', 'success');
+                } else if (StellarSdk.Server) {
+                    server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+                    log('Stellar SDK initialized (Server)', 'success');
+                } else {
+                    log('ERROR: Server class not found in SDK', 'error');
+                }
+            } catch (error) {
+                log('ERROR initializing SDK: ' + error.message, 'error');
+            }
+        });
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#00ff00';
+            console.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        async function connectWallet() {
+            const address = document.getElementById('wallet-address').value.trim();
+            
+            if (!address || !address.startsWith('G') || address.length !== 56) {
+                log('Invalid Stellar address!', 'error');
+                alert('Please enter a valid Stellar address (starts with G, 56 characters)');
+                return;
+            }
+
+            // Make sure server is initialized
+            if (!server) {
+                log('Initializing Stellar server...');
+                if (StellarSdk.Horizon && StellarSdk.Horizon.Server) {
+                    server = new StellarSdk.Horizon.Server('https://horizon-testnet.stellar.org');
+                } else if (StellarSdk.Server) {
+                    server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+                } else {
+                    throw new Error('Stellar SDK Server class not found');
+                }
+            }
+
+            log('Connecting wallet: ' + address);
+            walletAddress = address;
+
+            try {
+                log('Loading account from Horizon testnet...');
+                
+                // Load account info
+                const account = await server.loadAccount(address);
+                log('Account loaded successfully!', 'success');
+
+                // Get balances
+                let xlm = 0, usdc = 0;
+                account.balances.forEach(balance => {
+                    if (balance.asset_type === 'native') {
+                        xlm = parseFloat(balance.balance).toFixed(2);
+                        log('Found XLM balance: ' + xlm);
+                    } else if (balance.asset_code === 'USDC') {
+                        usdc = parseFloat(balance.balance).toFixed(2);
+                        log('Found USDC balance: ' + usdc);
+                    }
+                });
+
+                document.getElementById('connected-address').textContent = address.substring(0, 8) + '...' + address.substring(48);
+                document.getElementById('wallet-balance').textContent = `${xlm} XLM, ${usdc} USDC`;
+                document.getElementById('wallet-status').classList.remove('hidden');
+                document.getElementById('deposit-section').classList.remove('hidden');
+
+                log(`✓ Connected! Balance: ${xlm} XLM, ${usdc} USDC`, 'success');
+
+            } catch (error) {
+                log('Failed to load account: ' + error.message, 'error');
+                log('Error details: ' + JSON.stringify(error), 'error');
+                
+                if (error.message && error.message.includes('404')) {
+                    log('Account not found on testnet. Fund it at:', 'error');
+                    log('https://laboratory.stellar.org/#account-creator?network=test', 'info');
+                    alert('Account not found on testnet!\n\nFund your account at:\nhttps://laboratory.stellar.org/#account-creator?network=test\n\nPaste your address and click "Get test network lumens"');
+                } else {
+                    alert('Failed to load account: ' + error.message);
+                }
+            }
+        }
+
+        async function prepareDeposit() {
+            const amount = document.getElementById('deposit-amount').value;
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                log('Invalid amount!', 'error');
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (!walletAddress) {
+                log('No wallet connected!', 'error');
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            log(`Preparing deposit of ${amount} USDC...`);
+
+            try {
+                // Load account to check balances
+                const account = await server.loadAccount(walletAddress);
+                
+                // Real USDC on Stellar testnet (Circle's testnet USDC)
+                const usdcAsset = new StellarSdk.Asset(
+                    'USDC',
+                    'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
+                );
+
+                // Vault address (demo - in production this would be the contract address)
+                const vaultAddress = 'GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR';
+
+                // Check if user has USDC trustline
+                const hasUSDCTrustline = account.balances.some(
+                    balance => balance.asset_code === 'USDC' && 
+                               balance.asset_issuer === 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
+                );
+
+                if (!hasUSDCTrustline) {
+                    log('⚠ You need to add USDC trustline first!', 'error');
+                    alert('Your account needs a USDC trustline!\n\n1. Go to Stellar Laboratory\n2. Set up USDC trustline\n3. Asset: USDC\n4. Issuer: GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\n\nFor now, try a smaller XLM payment as a demo.');
+                    
+                    // Offer to do XLM payment instead
+                    if (confirm('Demo: Send XLM instead of USDC?')) {
+                        await prepareXLMDeposit(amount);
+                    }
+                    return;
+                }
+
+                // Check USDC balance
+                const usdcBalance = account.balances.find(
+                    balance => balance.asset_code === 'USDC' && 
+                               balance.asset_issuer === 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
+                );
+
+                if (!usdcBalance || parseFloat(usdcBalance.balance) < parseFloat(amount)) {
+                    log(`⚠ Insufficient USDC. You have: ${usdcBalance ? usdcBalance.balance : '0'} USDC`, 'error');
+                    alert(`Insufficient USDC!\n\nYou have: ${usdcBalance ? usdcBalance.balance : '0'} USDC\nNeed: ${amount} USDC\n\nFor demo, try sending XLM instead?`);
+                    
+                    if (confirm('Demo: Send XLM instead?')) {
+                        await prepareXLMDeposit(amount);
+                    }
+                    return;
+                }
+
+                log('Building USDC payment transaction...');
+                
+                // Build transaction
+                const transaction = new StellarSdk.TransactionBuilder(account, {
+                    fee: StellarSdk.BASE_FEE,
+                    networkPassphrase: StellarSdk.Networks.TESTNET
+                })
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: vaultAddress,
+                    asset: usdcAsset,
+                    amount: amount.toString()
+                }))
+                .setTimeout(180) // 3 minutes
+                .build();
+
+                const xdr = transaction.toEnvelope().toXDR('base64');
+                document.getElementById('unsigned-xdr').value = xdr;
+                document.getElementById('transaction-ready').classList.remove('hidden');
+
+                log(`✓ Transaction ready! Sending ${amount} USDC to Impact Vault`, 'success');
+                alert('Transaction ready!\n\n1. Copy the XDR below\n2. Open Freighter → Sign Transaction\n3. Paste XDR and approve\n4. Copy signed XDR back here\n5. Click Submit');
+
+            } catch (error) {
+                log('Failed to prepare transaction: ' + error.message, 'error');
+                console.error('Full error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function prepareXLMDeposit(amount) {
+            log(`Preparing XLM deposit of ${amount} XLM (demo mode)...`);
+            
+            try {
+                const account = await server.loadAccount(walletAddress);
+                
+                // For demo: Use a valid testnet address (AidLoop Demo Vault)
+                // In production, this would be the deployed smart contract address
+                const vaultAddress = 'GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR';
+
+                log(`Building transaction to vault: ${vaultAddress.substring(0, 8)}...`);
+
+                // Build XLM payment
+                const transaction = new StellarSdk.TransactionBuilder(account, {
+                    fee: StellarSdk.BASE_FEE,
+                    networkPassphrase: StellarSdk.Networks.TESTNET
+                })
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: vaultAddress,
+                    asset: StellarSdk.Asset.native(),
+                    amount: amount.toString()
+                }))
+                .setTimeout(180)
+                .build();
+
+                const xdr = transaction.toEnvelope().toXDR('base64');
+                document.getElementById('unsigned-xdr').value = xdr;
+                document.getElementById('transaction-ready').classList.remove('hidden');
+
+                log(`✓ XLM transaction ready! Sending ${amount} XLM to Impact Vault`, 'success');
+                alert('XLM Transaction ready!\n\n1. Copy the XDR below\n2. Open Freighter → Sign Transaction\n3. Paste XDR and approve\n4. Copy signed XDR back here\n5. Click Submit');
+
+            } catch (error) {
+                log('Failed to prepare XLM transaction: ' + error.message, 'error');
+                console.error('Full error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function copyXDR() {
+            const xdr = document.getElementById('unsigned-xdr').value;
+            navigator.clipboard.writeText(xdr).then(() => {
+                log('✓ XDR copied to clipboard!', 'success');
+                alert('✓ XDR copied!\n\nNow:\n1. Go to Stellar Laboratory (link above)\n2. Paste XDR\n3. Click "Sign with Freighter"\n4. Copy signed XDR back here');
+            }).catch(err => {
+                log('Failed to copy: ' + err, 'error');
+                // Fallback
+                const xdrField = document.getElementById('unsigned-xdr');
+                xdrField.select();
+                document.execCommand('copy');
+                alert('XDR copied!');
+            });
+        }
+
+        async function autoSignAndSubmit() {
+            const xdr = document.getElementById('unsigned-xdr').value;
+            
+            if (!xdr) {
+                log('No transaction to sign!', 'error');
+                return;
+            }
+
+            log('Attempting to sign with Freighter...');
+
+            // Try to use Freighter API directly
+            if (window.freighterApi) {
+                try {
+                    log('Freighter detected! Requesting signature...');
+                    const signedXDR = await window.freighterApi.signTransaction(xdr, {
+                        network: 'TESTNET',
+                        networkPassphrase: StellarSdk.Networks.TESTNET
+                    });
+                    
+                    log('✓ Transaction signed!', 'success');
+                    document.getElementById('signed-xdr').value = signedXDR;
+                    
+                    // Auto-submit
+                    await submitTransaction();
+                    
+                } catch (error) {
+                    log('Freighter signing failed: ' + error.message, 'error');
+                    alert('Freighter signing failed!\n\n' + error.message + '\n\nPlease use the Stellar Laboratory method instead.');
+                }
+            } else {
+                log('Freighter not available on localhost', 'error');
+                alert('⚠️ Freighter cannot inject into localhost pages.\n\nPlease use Option 1:\n1. Copy the XDR\n2. Go to Stellar Laboratory\n3. Sign with Freighter there\n4. Paste signed XDR back here');
+            }
+        }
+
+        async function submitTransaction() {
+            const signedXDR = document.getElementById('signed-xdr').value.trim();
+            
+            if (!signedXDR) {
+                log('Please paste the signed XDR!', 'error');
+                alert('Please paste the signed XDR from Freighter');
+                return;
+            }
+
+            log('Submitting transaction to Stellar testnet...');
+
+            try {
+                // Parse the signed transaction
+                const transaction = StellarSdk.TransactionBuilder.fromXDR(
+                    signedXDR,
+                    StellarSdk.Networks.TESTNET
+                );
+
+                log('Transaction parsed, submitting to Horizon...');
+                
+                // Submit to Horizon
+                const result = await server.submitTransaction(transaction);
+                
+                log('✅ Transaction successful!', 'success');
+                log('Hash: ' + result.hash, 'success');
+                log('Ledger: ' + result.ledger, 'info');
+                log('View: https://stellar.expert/explorer/testnet/tx/' + result.hash, 'info');
+                
+                alert(`🎉 Success!\n\nTransaction Hash:\n${result.hash}\n\nView on Stellar Expert:\nhttps://stellar.expert/explorer/testnet/tx/${result.hash}`);
+
+                // Clear and hide the XDR section
+                document.getElementById('unsigned-xdr').value = '';
+                document.getElementById('signed-xdr').value = '';
+                document.getElementById('transaction-ready').classList.add('hidden');
+
+                // Reload balance after 2 seconds
+                log('Refreshing balance...');
+                setTimeout(async () => {
+                    await connectWallet();
+                }, 2000);
+
+            } catch (error) {
+                log('❌ Transaction failed: ' + error.message, 'error');
+                console.error('Full error:', error);
+                
+                // More helpful error messages
+                if (error.response && error.response.data) {
+                    const extras = error.response.data.extras;
+                    if (extras && extras.result_codes) {
+                        log('Error codes: ' + JSON.stringify(extras.result_codes), 'error');
+                    }
+                }
+                
+                alert('Transaction failed!\n\n' + error.message + '\n\nCheck console for details.');
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            log('Ready! Paste your Freighter wallet address to begin.');
+        });
+    </script>
+</body>
+</html>
+

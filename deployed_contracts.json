@@ -1,0 +1,40 @@
+{
+  "network": "testnet",
+  "deployed_at": "2025-10-26T01:20:00Z",
+  "deployer_address": "GAEFBBEVPIUUOTKWOL7B3L6X46F5HYFY5E2IUDV2EUA3LOO6C5AJVB35",
+  "contracts": {
+    "ImpactVault": {
+      "address": "CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW",
+      "explorer": "https://stellar.expert/explorer/testnet/contract/CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW",
+      "description": "Manages donor USDC deposits and yield distribution"
+    },
+    "ProgramManager": {
+      "address": "CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN",
+      "explorer": "https://stellar.expert/explorer/testnet/contract/CDG2DJOKXE4MD7MCG5OAPBPLODROJ2AADW75EUSPMONCLPXVVYD5AVKN",
+      "description": "Creates and manages aid programs"
+    },
+    "VoucherManager": {
+      "address": "CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG",
+      "explorer": "https://stellar.expert/explorer/testnet/contract/CCTKNEL4UPLCTQSLIHE2Y3RIDFZKUTBONYFXSOOS2MSDU3YLRCCXSEIG",
+      "description": "Tracks vouchers and merchant redemptions"
+    },
+    "MerchantRegistry": {
+      "address": "CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY",
+      "explorer": "https://stellar.expert/explorer/testnet/contract/CCG6HA73JOZIJB7W5WGMXORZN4SECNI2HB2DMM4KXUSSCGD6SSG657FY",
+      "description": "Verifies and manages merchants"
+    },
+    "ImpactCreditNFT": {
+      "address": "CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2",
+      "explorer": "https://stellar.expert/explorer/testnet/contract/CA2PWCZSTCIZ75JRWXRIGU2LA7K25FZT2LMYRGJHXYTAJXK7PMURPUX2",
+      "description": "Proof-of-impact NFTs for ESG investors"
+    }
+  },
+  "next_steps": [
+    "Initialize each contract with admin address and USDC token",
+    "Set up cross-contract references",
+    "Build frontend to interact with these contracts",
+    "Test the full flow: deposit → program → voucher → redemption → NFT"
+  ]
+}
+
+

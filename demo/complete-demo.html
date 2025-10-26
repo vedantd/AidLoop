@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidLoop - Complete Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .demo-step {
+            transition: all 0.3s ease;
+        }
+        .demo-step.active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .demo-step.completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .blockchain-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-3xl font-bold mb-2">🌍 AidLoop Complete Demo</h1>
+            <p class="text-lg opacity-90">Self-Funding Impact Network on Stellar</p>
+        </div>
+    </div>
+
+    <!-- Demo Controls -->
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Demo Controls</h2>
+                <div class="flex gap-2">
+                    <button id="start-demo" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-play mr-2"></i>Start Demo
+                    </button>
+                    <button id="reset-demo" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        <i class="fas fa-refresh mr-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <span id="progress-text" class="text-sm text-gray-600">0/7</span>
+            </div>
+        </div>
+
+        <!-- Demo Steps -->
+        <div class="grid gap-4">
+            <!-- Step 1: Donor Deposit -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="1">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-wallet text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Donor Deposit</h3>
+                            <p class="text-sm text-gray-600">Donor deposits $1000 USDC into ImpactVault</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-1-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-1-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Program Creation -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-project-diagram text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Program Creation</h3>
+                            <p class="text-sm text-gray-600">NGO creates healthcare program with $500 funding</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-2-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-2-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Voucher Allocation -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-ticket-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Voucher Allocation</h3>
+                            <p class="text-sm text-gray-600">Beneficiary receives $150 healthcare voucher</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-3-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-3-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Merchant Redemption -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-store text-orange-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Merchant Redemption</h3>
+                            <p class="text-sm text-gray-600">Merchant redeems $25 voucher for medicines</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-4-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-4-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Blockchain Verification -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-link text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Blockchain Verification</h3>
+                            <p class="text-sm text-gray-600">On-chain verification and proof storage</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-5-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-5-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: NFT Minting -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-certificate text-pink-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Impact Credit NFT</h3>
+                            <p class="text-sm text-gray-600">Mint NFT with impact score 85/100</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-6-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-6-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Marketplace Trading -->
+            <div class="demo-step bg-white rounded-lg shadow-lg p-6" data-step="7">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-shopping-cart text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Marketplace Trading</h3>
+                            <p class="text-sm text-gray-600">ESG investor buys NFT for $95</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="step-7-status" class="text-sm text-gray-500">Pending</div>
+                        <div id="step-7-details" class="text-xs text-gray-400">Waiting...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Results -->
+        <div id="demo-results" class="bg-white rounded-lg shadow-lg p-6 mt-6 hidden">
+            <h3 class="text-lg font-semibold mb-4">Demo Results</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600">$1000</div>
+                    <div class="text-sm text-gray-600">Total Deposits</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">3</div>
+                    <div class="text-sm text-gray-600">Vouchers Issued</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">1</div>
+                    <div class="text-sm text-gray-600">Redemptions</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600">1</div>
+                    <div class="text-sm text-gray-600">NFTs Minted</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AidLoopDemo {
+            constructor() {
+                this.currentStep = 0;
+                this.totalSteps = 7;
+                this.demoSteps = [
+                    {
+                        name: 'Donor Deposit',
+                        duration: 3000,
+                        details: 'TXN_001: $1000 USDC deposited'
+                    },
+                    {
+                        name: 'Program Creation',
+                        duration: 2500,
+                        details: 'Healthcare program created with $500 funding'
+                    },
+                    {
+                        name: 'Voucher Allocation',
+                        duration: 2000,
+                        details: 'Beneficiary BEN123456 receives $150 voucher'
+                    },
+                    {
+                        name: 'Merchant Redemption',
+                        duration: 4000,
+                        details: 'Merchant redeems $25 voucher for medicines'
+                    },
+                    {
+                        name: 'Blockchain Verification',
+                        duration: 3500,
+                        details: 'Proof stored on IPFS, signature verified'
+                    },
+                    {
+                        name: 'NFT Minting',
+                        duration: 2000,
+                        details: 'Impact Credit NFT #001 minted'
+                    },
+                    {
+                        name: 'Marketplace Trading',
+                        duration: 3000,
+                        details: 'ESG investor purchases NFT for $95'
+                    }
+                ];
+            }
+
+            async startDemo() {
+                console.log('Starting AidLoop demo...');
+                document.getElementById('start-demo').disabled = true;
+                
+                for (let i = 0; i < this.totalSteps; i++) {
+                    await this.runStep(i);
+                }
+                
+                this.showResults();
+            }
+
+            async runStep(stepIndex) {
+                const step = this.demoSteps[stepIndex];
+                const stepElement = document.querySelector(`[data-step="${stepIndex + 1}"]`);
+                const statusElement = document.getElementById(`step-${stepIndex + 1}-status`);
+                const detailsElement = document.getElementById(`step-${stepIndex + 1}-details`);
+                
+                // Activate step
+                stepElement.classList.add('active');
+                statusElement.textContent = 'Running...';
+                detailsElement.textContent = step.details;
+                
+                // Simulate blockchain processing
+                await this.simulateBlockchainProcessing(step.duration);
+                
+                // Complete step
+                stepElement.classList.remove('active');
+                stepElement.classList.add('completed');
+                statusElement.textContent = 'Completed';
+                detailsElement.textContent = '✓ Success';
+                
+                // Update progress
+                this.updateProgress(stepIndex + 1);
+            }
+
+            async simulateBlockchainProcessing(duration) {
+                return new Promise(resolve => {
+                    setTimeout(resolve, duration);
+                });
+            }
+
+            updateProgress(completedSteps) {
+                const progress = (completedSteps / this.totalSteps) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('progress-text').textContent = `${completedSteps}/${this.totalSteps}`;
+            }
+
+            showResults() {
+                document.getElementById('demo-results').classList.remove('hidden');
+                console.log('Demo completed successfully!');
+            }
+
+            resetDemo() {
+                // Reset all steps
+                document.querySelectorAll('.demo-step').forEach(step => {
+                    step.classList.remove('active', 'completed');
+                });
+                
+                // Reset status elements
+                for (let i = 1; i <= 7; i++) {
+                    document.getElementById(`step-${i}-status`).textContent = 'Pending';
+                    document.getElementById(`step-${i}-details`).textContent = 'Waiting...';
+                }
+                
+                // Reset progress
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-text').textContent = '0/7';
+                
+                // Hide results
+                document.getElementById('demo-results').classList.add('hidden');
+                
+                // Enable start button
+                document.getElementById('start-demo').disabled = false;
+            }
+        }
+
+        // Initialize demo
+        const demo = new AidLoopDemo();
+        
+        // Event listeners
+        document.getElementById('start-demo').addEventListener('click', () => {
+            demo.startDemo();
+        });
+        
+        document.getElementById('reset-demo').addEventListener('click', () => {
+            demo.resetDemo();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freighter Diagnostic Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 40px;
+            background: #1e1e1e;
+            color: #00ff00;
+        }
+        h1 { color: #00ff00; }
+        .test { margin: 20px 0; padding: 15px; background: #2d2d2d; border-radius: 5px; }
+        .pass { color: #4ade80; }
+        .fail { color: #f87171; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Freighter Diagnostic Test</h1>
+    
+    <div class="test" id="test1">
+        <strong>Test 1:</strong> Checking window.freighterApi...
+    </div>
+    
+    <div class="test" id="test2">
+        <strong>Test 2:</strong> Checking window.freighter...
+    </div>
+    
+    <div class="test" id="test3">
+        <strong>Test 3:</strong> Checking all window properties...
+    </div>
+    
+    <div class="test" id="test4">
+        <strong>Test 4:</strong> Browser detection...
+    </div>
+
+    <button onclick="runTests()">🔄 Run Tests Again</button>
+    <button onclick="testConnection()">🔌 Test Connection</button>
+    
+    <div class="test">
+        <strong>Instructions:</strong><br>
+        1. Make sure you have Freighter installed<br>
+        2. Check that it's enabled in your extensions<br>
+        3. Refresh this page<br>
+        4. If all tests fail, Freighter is not installed or not working<br>
+        <br>
+        <strong>Install Freighter:</strong><br>
+        Chrome/Brave/Edge: <a href="https://chrome.google.com/webstore/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk" target="_blank" style="color: #60a5fa;">Chrome Web Store</a><br>
+        Firefox: <a href="https://addons.mozilla.org/en-US/firefox/addon/freighter/" target="_blank" style="color: #60a5fa;">Firefox Add-ons</a>
+    </div>
+
+    <script>
+        function log(elementId, message, pass) {
+            const el = document.getElementById(elementId);
+            const className = pass ? 'pass' : 'fail';
+            const icon = pass ? '✓' : '✗';
+            el.innerHTML = `<strong>Test ${elementId.replace('test', '')}:</strong> <span class="${className}">${icon} ${message}</span>`;
+        }
+
+        function runTests() {
+            console.log('Running tests...');
+            console.log('window.freighterApi:', window.freighterApi);
+            console.log('All window keys:', Object.keys(window).filter(k => k.toLowerCase().includes('fr')));
+            
+            // Test 1: window.freighterApi
+            if (typeof window.freighterApi !== 'undefined' && window.freighterApi) {
+                log('test1', 'window.freighterApi exists! ' + JSON.stringify(Object.keys(window.freighterApi)), true);
+            } else {
+                log('test1', 'window.freighterApi is undefined', false);
+            }
+
+            // Test 2: window.freighter
+            if (typeof window.freighter !== 'undefined' && window.freighter) {
+                log('test2', 'window.freighter exists! ' + JSON.stringify(Object.keys(window.freighter)), true);
+            } else {
+                log('test2', 'window.freighter is undefined', false);
+            }
+
+            // Test 3: Check all window properties for anything freighter-related
+            const freighterProps = Object.keys(window).filter(key => 
+                key.toLowerCase().includes('freighter') || 
+                key.toLowerCase().includes('stellar')
+            );
+            if (freighterProps.length > 0) {
+                log('test3', 'Found properties: ' + freighterProps.join(', '), true);
+            } else {
+                log('test3', 'No Freighter-related properties found in window', false);
+            }
+
+            // Test 4: Browser detection
+            const userAgent = navigator.userAgent;
+            let browser = 'Unknown';
+            if (userAgent.includes('Chrome')) browser = 'Chrome/Chromium';
+            if (userAgent.includes('Firefox')) browser = 'Firefox';
+            if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+            if (userAgent.includes('Edg')) browser = 'Edge';
+            
+            log('test4', `Browser: ${browser} - User Agent: ${userAgent}`, true);
+        }
+
+        async function testConnection() {
+            try {
+                console.log('Testing connection...');
+                console.log('window.freighterApi:', window.freighterApi);
+                
+                // Try direct API call
+                if (window.freighterApi && window.freighterApi.getPublicKey) {
+                    alert('✓ Freighter found! Attempting connection...');
+                    const publicKey = await window.freighterApi.getPublicKey();
+                    alert('✓ Success!\n\nYour wallet: ' + publicKey);
+                    return;
+                }
+                
+                // Try alternative method
+                if (window.freighter && window.freighter.getPublicKey) {
+                    alert('✓ Freighter found (alt)! Attempting connection...');
+                    const publicKey = await window.freighter.getPublicKey();
+                    alert('✓ Success!\n\nYour wallet: ' + publicKey);
+                    return;
+                }
+                
+                alert('❌ Freighter API not found!\n\nTrying to detect it...\n\nwindow.freighterApi: ' + typeof window.freighterApi + '\nwindow.freighter: ' + typeof window.freighter);
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                alert('❌ Connection failed:\n\n' + error.message + '\n\nCheck browser console for details');
+            }
+        }
+
+        // Listen for custom event that Freighter might dispatch
+        document.addEventListener('freighterApiInit', () => {
+            console.log('✓ Freighter API initialized via event');
+            runTests();
+        });
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            console.log('=== Freighter Diagnostic ===');
+            console.log('Browser:', navigator.userAgent);
+            console.log('window.freighterApi:', window.freighterApi);
+            console.log('window.freighter:', window.freighter);
+            console.log('All window properties:', Object.keys(window).length);
+            
+            setTimeout(runTests, 500);
+            
+            // Keep checking for 15 seconds with detailed logging
+            let checks = 0;
+            const interval = setInterval(() => {
+                checks++;
+                console.log(`Check ${checks}: freighterApi =`, typeof window.freighterApi, ', freighter =', typeof window.freighter);
+                
+                if (window.freighterApi || window.freighter) {
+                    console.log('✓ Freighter detected after', checks, 'seconds');
+                    runTests();
+                    clearInterval(interval);
+                } else if (checks >= 15) {
+                    console.log('✗ Freighter not detected after 15 seconds');
+                    console.log('Final check - All window keys with "fr":', Object.keys(window).filter(k => k.toLowerCase().includes('fr')));
+                    runTests();
+                    clearInterval(interval);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+

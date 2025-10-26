@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AidLoop - Test Deposit</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/11.2.2/stellar-sdk.js"></script>
+</head>
+<body>
+    <h1>Test Deposit Transaction</h1>
+    <button onclick="testDeposit()">Test Deposit (10 USDC)</button>
+    <pre id="output"></pre>
+
+    <script>
+        const log = (msg) => {
+            console.log(msg);
+            document.getElementById('output').textContent += msg + '\n';
+        };
+
+        async function testDeposit() {
+            try {
+                log('🚀 Starting deposit test...');
+                
+                const publicKey = 'GAPB44C33RGPJKN3OMP2ELZBTXCU77O66WWPEZRQY2ZJGXRLZXCULFXI';
+                const vaultContract = 'CCCZ7BFJIM7O4XXZK22P6ZXGPM6NNWDZXR4U3YTE5WI6ITTA342HAICW';
+                const amount = 100000000; // 10 USDC in stroops
+                
+                log(`\n📝 Config:`);
+                log(`  Donor: ${publicKey}`);
+                log(`  Vault: ${vaultContract}`);
+                log(`  Amount: ${amount / 1e7} USDC`);
+                
+                // Load account
+                log('\n⏳ Loading account from Horizon...');
+                const horizonServer = new StellarSdk.Horizon.Server('https://horizon-testnet.stellar.org');
+                const account = await horizonServer.loadAccount(publicKey);
+                log('✅ Account loaded');
+                
+                // Create Soroban server
+                log('\n⏳ Connecting to Soroban RPC...');
+                const sorobanServer = new StellarSdk.SorobanRpc.Server('https://soroban-testnet.stellar.org');
+                log('✅ Connected to Soroban RPC');
+                
+                // Build contract
+                const contract = new StellarSdk.Contract(vaultContract);
+                
+                // Build transaction
+                log('\n⏳ Building transaction...');
+                const builtTransaction = new StellarSdk.TransactionBuilder(account, {
+                    fee: '100000',
+                    networkPassphrase: 'Test SDF Network ; September 2015',
+                })
+                .addOperation(
+                    contract.call(
+                        'deposit',
+                        StellarSdk.Address.fromString(publicKey).toScVal(),
+                        StellarSdk.nativeToScVal(amount, { type: 'i128' })
+                    )
+                )
+                .setTimeout(180)
+                .build();
+                
+                log('✅ Transaction built');
+                log(`  Operations: ${builtTransaction.operations.length}`);
+                
+                // Simulate
+                log('\n⏳ Simulating transaction...');
+                const simulatedTx = await sorobanServer.simulateTransaction(builtTransaction);
+                
+                log('✅ Simulation complete');
+                log(`  Result: ${JSON.stringify(simulatedTx, null, 2)}`);
+                
+                if (StellarSdk.SorobanRpc.Api.isSimulationError(simulatedTx)) {
+                    log(`❌ Simulation error: ${simulatedTx.error}`);
+                    return;
+                }
+                
+                if (simulatedTx.result) {
+                    log('✅ Simulation successful!');
+                    log(`  Result value: ${simulatedTx.result.retval}`);
+                } else {
+                    log('⚠️  No result in simulation');
+                }
+                
+                // Prepare transaction
+                log('\n⏳ Preparing transaction with simulation results...');
+                const preparedTx = StellarSdk.SorobanRpc.assembleTransaction(
+                    builtTransaction,
+                    simulatedTx
+                ).build();
+                
+                log('✅ Transaction prepared');
+                log(`  XDR: ${preparedTx.toXDR().substring(0, 50)}...`);
+                
+                log('\n✨ Ready to sign! Copy XDR and sign with Freighter');
+                
+            } catch (error) {
+                log(`\n❌ ERROR: ${error.message}`);
+                log(`  Stack: ${error.stack}`);
+                console.error('Full error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+
+

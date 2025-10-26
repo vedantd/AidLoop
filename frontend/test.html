@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidLoop Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        button { margin: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .status { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 AidLoop Frontend Test</h1>
+    
+    <div class="test-section">
+        <h2>Button Tests</h2>
+        <button onclick="testConnectWallet()">Connect Wallet</button>
+        <button onclick="testDeposit()">Deposit USDC</button>
+        <button onclick="testPrograms()">View Programs</button>
+        <button onclick="testMarketplace()">Impact Marketplace</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console-output" class="status">
+            <p>Open browser console (F12) to see detailed logs</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>App Status</h2>
+        <div id="app-status" class="status">
+            <p>App Status: <span id="status-text">Initializing...</span></p>
+            <p>Wallet Connected: <span id="wallet-status">No</span></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Test functions
+        function testConnectWallet() {
+            console.log('=== Testing Connect Wallet ===');
+            if (window.aidLoopApp) {
+                window.aidLoopApp.connectWallet();
+            } else {
+                console.error('AidLoop app not found');
+            }
+        }
+        
+        function testDeposit() {
+            console.log('=== Testing Deposit ===');
+            if (window.aidLoopApp) {
+                window.aidLoopApp.showDepositModal();
+            } else {
+                console.error('AidLoop app not found');
+            }
+        }
+        
+        function testPrograms() {
+            console.log('=== Testing Programs ===');
+            if (window.aidLoopApp) {
+                window.aidLoopApp.showProgramsModal();
+            } else {
+                console.error('AidLoop app not found');
+            }
+        }
+        
+        function testMarketplace() {
+            console.log('=== Testing Marketplace ===');
+            if (window.aidLoopApp) {
+                window.aidLoopApp.showMarketplaceModal();
+            } else {
+                console.error('AidLoop app not found');
+            }
+        }
+        
+        // Update status display
+        function updateStatus() {
+            const statusText = document.getElementById('status-text');
+            const walletStatus = document.getElementById('wallet-status');
+            
+            if (window.aidLoopApp) {
+                statusText.textContent = 'App Loaded';
+                walletStatus.textContent = window.aidLoopApp.walletConnected ? 'Yes' : 'No';
+            } else {
+                statusText.textContent = 'App Not Loaded';
+                walletStatus.textContent = 'No';
+            }
+        }
+        
+        // Update status every second
+        setInterval(updateStatus, 1000);
+        
+        // Initial status update
+        setTimeout(updateStatus, 500);
+    </script>
+</body>
+</html>
+
